@@ -53,7 +53,7 @@ A Rust-based logic gate simulation game where users can combine basic logic gate
 
         // Simulate for a number of cycles
         let cycles = 3;
-        let outputs = circuit.evaluate(cycles);
+        let outputs = circuit.evaluate(cycles, RunType::PARALLEL);
         println!("Outputs after {} cycles: {:?}", cycles, outputs);
     }
     ```
@@ -83,9 +83,9 @@ Contributions are welcome! Please feel free to submit a pull request or open an 
 ## TODO:
 
  - [X] Create branch evaluation logic
- - [ ] Make branch evaluation logic to be computed parallel
- - [ ] Create methods for merging branches
- - [ ] Code multiple branch evaluation logic
+ - [X] Make branch evaluation logic to be computed parallel
+ - [ ] ~~Create methods for merging branches~~
+ - [ ] ~~Code multiple branch evaluation logic~~
  - [ ] List a new syntax for building and defining circuits
  - [ ] Create GUI for interaction
  - [ ] Create level design 
