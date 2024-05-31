@@ -1,5 +1,12 @@
 
+use std::collections::HashMap;
 use crate::gates::logic_gates::LogicGate;
+use rayon::prelude::*;
+
+pub enum RunType {
+    SEQUENTIAL,
+    PARALLEL
+}
 
 pub struct Component{
     gate: LogicGate,
@@ -19,14 +26,16 @@ impl Component{
 
 pub struct Circuit {
     components: Vec<Component>, // (gate, input indices)
-    pins: Vec<bool>
+    pins: Vec<bool>,
+    output_map: HashMap<usize, usize>
 }
 
 impl Circuit {
     pub fn new() -> Self {
         Circuit {
             components: Vec::new(),
-            pins: Vec::new()
+            pins: Vec::new(),
+            output_map: HashMap::new()
         }
     }
 
@@ -40,10 +49,25 @@ impl Circuit {
             input_indices,
             output_index: (self.components.len()+self.pins.len())
         };
+        println!("k:{}, v:{}", component.output_index, self.components.len());
+        self.output_map.insert( component.output_index, self.components.len());
         self.components.push(component);
     }
 
-    pub fn evaluate(&self, cycles: usize) -> Vec<bool> {
+
+    fn get_component_output(&self, idx: usize)->Option<&Component>{
+        match self.output_map.get(&idx){
+            Some(&val) =>{
+                return Some(&self.components[val]);
+            }
+            None =>{
+                None
+            }
+        }
+        
+    }
+
+    pub fn evaluate(&self, cycles: usize, run_type: RunType) -> Vec<bool> {
         let mut outputs = vec![false; self.pins.len() + self.components.len()];
 
         // Initialize the outputs with initial pins
@@ -52,13 +76,33 @@ impl Circuit {
         for clk in 0..cycles-1 {
             let mut new_outputs = outputs.clone(); // start a new transaction at each cycle
 
-            // TODO: parallelize this for loop
-            for component in &self.components{
-                
-                println!("\nPropogating gate {}", component.gate.info());
-                new_outputs[component.output_index] = component.fire(&outputs);
-                
-            };
+            match run_type{
+                RunType::PARALLEL =>{
+                    // paraller execute logic
+                    new_outputs.par_iter_mut().enumerate().for_each(|(idx, val)|{
+                        let component = self.get_component_output(idx);
+                        match component {
+                            Some(component)=>{
+                                println!("\nPropogating gate {}", component.gate.info());
+                                *val = component.fire(&outputs);
+
+                            }
+                            None =>{
+                                println!("Skipping Invalid gate");
+                            }
+                        }
+                    });
+                }
+                RunType::SEQUENTIAL =>{
+                    // Sequential Execute logic
+                    for component in &self.components{
+                        
+                        println!("\nPropogating gate {}", component.gate.info());
+                        new_outputs[component.output_index] = component.fire(&outputs);
+                        
+                    };
+                }
+            }
 
             outputs = new_outputs; // only commit after one cycle
             println!("---------- {} cycles complete ------------ : evaluated to {:?}", clk+1, outputs);

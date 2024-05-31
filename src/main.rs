@@ -1,7 +1,7 @@
 mod gates;
 
 use gates::logic_gates::LogicGate;
-use gates::circuit::Circuit;
+use gates::circuit::{Circuit, RunType};
 
 fn main() {
     let mut circuit = Circuit::new();
@@ -15,7 +15,8 @@ fn main() {
     circuit.add_gate(LogicGate::NotGate, vec![2]);
 
     // Simulate for a number of cycles
+    
     let cycles = 3;
-    let outputs = circuit.evaluate(cycles);
+    let outputs = circuit.evaluate(cycles, RunType::PARALLEL);
     println!("Outputs after {} cycles: {:?}", cycles, outputs);
 }
