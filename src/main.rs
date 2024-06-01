@@ -1,4 +1,5 @@
 mod gates;
+mod tests; // testcases
 
 use gates::logic_gates::LogicGate;
 use gates::circuit::{Circuit, RunType};

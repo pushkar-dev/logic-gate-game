@@ -1,5 +1,3 @@
-mod gates;
-
 #[cfg(test)]
 mod tests{
     use crate::gates::{circuit::{Circuit, RunType}, logic_gates::LogicGate};
