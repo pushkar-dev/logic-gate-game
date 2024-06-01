@@ -27,29 +27,45 @@ impl Component{
 pub struct Circuit {
     components: Vec<Component>, // (gate, input indices)
     pins: Vec<bool>,
-    output_map: HashMap<usize, usize>
+    output_map: HashMap<usize, usize>,
+    op_pin_size: usize
 }
 
 impl Circuit {
     pub fn new() -> Self {
-        Circuit {
+        let mut c = Circuit {
             components: Vec::new(),
             pins: Vec::new(),
-            output_map: HashMap::new()
-        }
+            output_map: HashMap::new(),
+            op_pin_size: 0
+        };
+        c.add_input(false);
+        c.add_input(true);
+        c
     }
 
     pub fn add_input(&mut self, input: bool) {
         self.pins.push(input);
     }
 
-    pub fn add_gate(&mut self, gate: LogicGate, input_indices: Vec<usize>) {
+    pub fn add_gate(&mut self, gate: LogicGate, input_indices: Vec<usize>, output: Option<usize>) {
+        
+        let output_index= match output{
+            Some(index)=>{
+                index
+            }
+            None=>{
+                self.op_pin_size += 1;
+                self.components.len()+self.pins.len()
+
+            }
+        };
+        
         let component = Component{
             gate,
             input_indices,
-            output_index: (self.components.len()+self.pins.len())
+            output_index
         };
-        println!("k:{}, v:{}", component.output_index, self.components.len());
         self.output_map.insert( component.output_index, self.components.len());
         self.components.push(component);
     }
@@ -68,7 +84,7 @@ impl Circuit {
     }
 
     pub fn evaluate(&self, cycles: usize, run_type: RunType) -> Vec<bool> {
-        let mut outputs = vec![false; self.pins.len() + self.components.len()];
+        let mut outputs = vec![false; self.pins.len() + self.op_pin_size];
 
         // Initialize the outputs with initial pins
         outputs[..self.pins.len()].copy_from_slice(&self.pins);
@@ -76,6 +92,9 @@ impl Circuit {
         for clk in 0..cycles-1 {
             let mut new_outputs = outputs.clone(); // start a new transaction at each cycle
 
+            
+            
+            
             match run_type{
                 RunType::PARALLEL =>{
                     // paraller execute logic
