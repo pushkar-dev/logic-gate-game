@@ -57,8 +57,8 @@ Contributions are welcome! Please feel free to submit a pull request or open an 
 
  - [X] Create branch evaluation logic
  - [X] Make branch evaluation logic to be computed parallel
- - [ ] $${\color{red}{Create methods for merging branches}}$$
- - [ ] $${\color{red}{Code multiple branch evaluation logic}}$$
+ - [ ] <p style='color:red'>Create methods for merging branches</p>
+ - [ ] <p style='color:red'>Code multiple branch evaluation logic</p>
  - [ ] List a new syntax for building and defining circuits
  - [ ] Create GUI for interaction (in progress)
  - [ ] Create level design 
