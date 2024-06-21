@@ -35,6 +35,10 @@ A Rust-based logic gate simulation game where users can combine basic logic gate
     cargo run
     ```
 
+## Idea 
+
+![alt text](basic_design_idea.png)
+
 ## Project Structure
 
 - `src/main.rs`: The main entry point of the application. Contains the setup and execution of the circuit simulation.
@@ -57,7 +61,7 @@ Contributions are welcome! Please feel free to submit a pull request or open an 
 
  - [X] Create branch evaluation logic
  - [X] Make branch evaluation logic to be computed parallel
- - [ ] ~~$$Create methods for merging branches~~ (Cancelled)
+ - [ ] ~~Create methods for merging branches~~ (Cancelled)
  - [ ] ~~Code multiple branch evaluation logic~~ (Cancelled)
  - [ ] List a new syntax for building and defining circuits
  - [ ] Create GUI for interaction (In Progress)

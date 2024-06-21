@@ -1,5 +1,6 @@
 use ggez::event;
-use ggez::graphics::{self, Color};
+use ggez::graphics::{self, Canvas, Color, Rect, Text, TextFragment};
+use ggez::mint::Point2;
 use ggez::{Context, GameResult};
 use ggez::glam::*;
 
@@ -7,6 +8,8 @@ use crate::gates::circuit;
 use crate::LogicGate;
 use crate::Circuit;
 
+const X_PAD:f32=10.0;
+const Y_PAD:f32=10.0;
 
 pub struct GameState {
     circuit: Circuit,
@@ -23,6 +26,85 @@ impl GameState {
     pub fn reset(&mut self, ctx: &mut Context)-> GameResult<()>{
         Ok(())
     }
+
+    pub fn draw_picker_box(&mut self, ctx: &mut Context,canvas: &mut Canvas, x_offset:f32, y_offset:f32) -> GameResult<()>{
+        let picker_height = 100.0;
+        let picker_width = 1500.0;
+        let picker_area= graphics::Mesh::new_rectangle(
+            ctx, 
+            graphics::DrawMode::stroke(5.0), 
+            Rect::new(0.0, 0.0, picker_width, picker_height), 
+            Color::BLACK)?;
+        
+        let picker_border = graphics::Mesh::new_line(
+            ctx, 
+            &[Point2{ x: 0.0, y: 0.0}, Point2{ x:0.0, y:picker_height}], 
+            5.0, 
+            Color::BLACK)?;
+        
+        canvas.draw(&picker_area, Vec2::new(X_PAD+x_offset, Y_PAD+y_offset));
+        for i in 1..15{
+            canvas.draw(&picker_border, Vec2::new(X_PAD+x_offset+(i as f32*picker_height), Y_PAD+y_offset));
+        }
+        Ok(())
+    }
+    
+    pub fn draw_title_text(&mut self, ctx: &mut Context, canvas: &mut Canvas, text_size:f32) -> GameResult<()> {
+        let title = TextFragment::new("Logic Gate Game").color(Color::BLACK).scale(text_size);
+        let title_text = Text::new(title);
+
+        canvas.draw(&title_text, Vec2::new(X_PAD, Y_PAD));
+        Ok(())
+    }
+
+    pub fn draw_breadboard(&mut self, ctx: &mut Context, canvas: &mut Canvas, x_offset:f32, y_offset:f32)->GameResult<()> {
+        
+        let board_height = 700.0;
+        let board_width =1500.0;
+        let slot_size=100.0;
+
+        let board_area= graphics::Mesh::new_rectangle(
+            ctx, 
+            graphics::DrawMode::stroke(2.0), 
+            Rect::new(0.0, 0.0, board_width, board_height), 
+            Color::BLACK)?;
+        let board_border_y = graphics::Mesh::new_line(
+            ctx, 
+            &[Point2{ x: 0.0, y: 0.0}, Point2{ x:0.0, y:board_height}], 
+            2.0, 
+            Color::BLACK)?;
+        let board_border_x = graphics::Mesh::new_line(
+            ctx, 
+            &[Point2{ x: 0.0, y: 0.0}, Point2{ x:board_width, y:0.0}], 
+            2.0, 
+            Color::BLACK)?;
+        
+        canvas.draw(&board_area, Vec2::new(X_PAD+x_offset, Y_PAD+y_offset));
+        for i in 1..15{
+            canvas.draw(&board_border_y, Vec2::new(X_PAD+x_offset+(i as f32*slot_size), Y_PAD+y_offset));
+        }
+
+        for i in 1..9{
+            canvas.draw(&board_border_x, Vec2::new(X_PAD+x_offset, Y_PAD+y_offset+(i as f32*slot_size)));
+        }
+        
+        Ok(())
+    }
+
+    pub fn draw_level_info(&mut self, ctx: &mut Context, canvas: &mut Canvas, x_offset:f32, y_offset:f32)->GameResult<()>{
+        let level_info_height=100.0+20.0+700.0;
+        let level_info_width= 300.0;
+
+        let level_area= graphics::Mesh::new_rectangle(
+            ctx, 
+            graphics::DrawMode::stroke(5.0), 
+            Rect::new(0.0, 0.0, level_info_width, level_info_height), 
+            Color::BLACK)?;
+        
+        canvas.draw(&level_area, Vec2::new(X_PAD+x_offset, Y_PAD+y_offset));
+
+        Ok(())
+    }
 }
 
 impl event::EventHandler<ggez::GameError> for GameState {
@@ -36,19 +118,15 @@ impl event::EventHandler<ggez::GameError> for GameState {
             ctx,
             Color::WHITE,
         );
+        let title_size = 100.0;
+        self.draw_title_text(ctx, &mut canvas, title_size)?;
+        
+        self.draw_picker_box(ctx, &mut canvas, 0.0, title_size+5.0)?;
 
-        let circle = graphics::Mesh::new_circle(
-            ctx,
-            graphics::DrawMode::fill(),
-            Vec2::new(0.0, 0.0),
-            100.0,
-            2.0,
-            Color::BLACK,
-        )?;
-        canvas.draw(&circle, Vec2::new(100.0, 380.0));
+        self.draw_breadboard(ctx, &mut canvas, 0.0, title_size+100.0+20.0)?;
 
-        canvas.finish(ctx)?;
+        self.draw_level_info(ctx, &mut canvas, 1500.0+10.0, 100.0+5.0)?;
 
-        Ok(())
+        canvas.finish(ctx)
     }
 }
