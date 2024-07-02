@@ -1,24 +1,31 @@
-use ggez::event;
+use ggez::event::{self, MouseButton};
 use ggez::graphics::{self, Canvas, Color, Rect, Text, TextFragment};
 use ggez::mint::Point2;
-use ggez::{Context, GameResult};
+use ggez::{Context, GameError, GameResult};
 use ggez::glam::*;
 
 use crate::gates::circuit;
 use crate::LogicGate;
 use crate::Circuit;
+use crate::frontend::dragable::DraggableComponent;
 
 const X_PAD:f32=10.0;
 const Y_PAD:f32=10.0;
 
 pub struct GameState {
     circuit: Circuit,
+    dragables: Vec<DraggableComponent>,
 }
 
 impl GameState {
     pub fn new(ctx: &mut Context) -> GameResult<GameState> {
         let mut s= GameState{
             circuit: Circuit::new(),
+            dragables: vec![
+                DraggableComponent::new(Point2{x: 100.0, y: 100.0}, (50.0, 50.0)),
+                DraggableComponent::new(Point2{x: 200.0, y: 100.0}, (50.0, 50.0)),
+                DraggableComponent::new(Point2{x: 300.0, y: 100.0}, (50.0, 50.0)),
+            ],
         };
         s.reset(ctx)?;
         Ok(s)
@@ -127,6 +134,35 @@ impl event::EventHandler<ggez::GameError> for GameState {
 
         self.draw_level_info(ctx, &mut canvas, 1500.0+10.0, 100.0+5.0)?;
 
+        for dragable in &self.dragables{
+            dragable.draw(ctx, &mut canvas)?
+        }
+
         canvas.finish(ctx)
+    }
+
+    fn mouse_button_down_event(&mut self, _ctx: &mut Context, button: MouseButton, x: f32, y: f32) -> Result<(), GameError> {
+        if button == MouseButton::Left {
+            for component in &mut self.dragables {
+                component.handle_mouse_down(x, y);
+            }
+        }
+        Ok(())
+    }
+
+    fn mouse_button_up_event(&mut self, _ctx: &mut Context, button: MouseButton, _x: f32, _y: f32) -> Result<(), GameError> {
+        if button == MouseButton::Left {
+            for component in &mut self.dragables {
+                component.handle_mouse_up();
+            }
+        }
+        Ok(())
+    }
+
+    fn mouse_motion_event(&mut self, _ctx: &mut Context, x: f32, y:f32,  dx: f32, dy: f32)-> Result<(), GameError> {
+        for component in &mut self.dragables {
+            component.handle_mouse_motion(x, y);
+        }
+        Ok(())
     }
 }
