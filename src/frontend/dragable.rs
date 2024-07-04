@@ -2,6 +2,7 @@ use ggez::glam::vec2;
 use ggez::graphics::{self, Canvas, Color, Image};
 use ggez::mint::Point2;
 use ggez::{Context, GameResult};
+use crate::gates::logic_gates::LogicGate;
 
 pub struct DraggableComponent {
     pos: Point2<f32>,
@@ -27,16 +28,17 @@ impl DraggableComponent {
         }
     }
 
+    pub fn from_type(t: LogicGate, ctx: &mut Context, pos: Point2<f32>, width:u32, height:u32) -> Self{
+        match t {
+            LogicGate::AndGate => DraggableComponent::new(ctx, pos, width, height, "/images/and_gate.png"),
+            LogicGate::OrGate => DraggableComponent::new(ctx, pos, width, height, "/images/or_gate.png"),
+            LogicGate::NotGate => DraggableComponent::new(ctx, pos, width, height, "/images/not_gate.png"), 
+        }
+    }
+
     pub fn draw(&self, ctx: &mut Context, canvas: &mut Canvas) -> GameResult {
-        // let rectangle = graphics::Mesh::new_rectangle(
-        //     ctx,
-        //     graphics::DrawMode::fill(),
-        //     graphics::Rect::new(self.pos.x, self.pos.y, self.size.0, self.size.1),
-        //     graphics::Color::from_rgb(0, 255, 0),
-        // )?;
         let img_param = graphics::DrawParam::default().dest(vec2(self.pos.x, self.pos.y));
         canvas.draw(&self.img, img_param);
-        // canvas.draw( &rectangle, graphics::DrawParam::default());
         Ok(())
     }
 

@@ -8,6 +8,7 @@ use crate::gates::circuit;
 use crate::LogicGate;
 use crate::Circuit;
 use crate::frontend::dragable::DraggableComponent;
+use crate::frontend::wire::ConnectingComponent;
 
 const X_PAD:f32=10.0;
 const Y_PAD:f32=10.0;
@@ -15,6 +16,7 @@ const Y_PAD:f32=10.0;
 pub struct GameState {
     circuit: Circuit,
     dragables: Vec<DraggableComponent>,
+    wire: ConnectingComponent,
 }
 
 impl GameState {
@@ -22,10 +24,11 @@ impl GameState {
         let mut s= GameState{
             circuit: Circuit::new(),
             dragables: vec![
-                DraggableComponent::new(ctx,Point2{x: 100.0, y: 100.0}, 100, 100, "/images/not_gate.png"),
-                DraggableComponent::new(ctx,Point2{x: 200.0, y: 100.0}, 100, 100, "/images/and_gate.png"),
-                DraggableComponent::new(ctx,Point2{x: 300.0, y: 100.0}, 100, 100, "/images/or_gate.png"),
+                DraggableComponent::from_type(LogicGate::NotGate,ctx,Point2{x: 100.0, y: 100.0}, 100, 100),
+                DraggableComponent::from_type(LogicGate::AndGate,ctx,Point2{x: 200.0, y: 100.0}, 100, 100),
+                DraggableComponent::from_type(LogicGate::OrGate,ctx,Point2{x: 300.0, y: 100.0}, 100, 100),
             ],
+            wire : ConnectingComponent::new(),
         };
         s.reset(ctx)?;
         Ok(s)
@@ -65,7 +68,7 @@ impl GameState {
     }
 
     pub fn draw_breadboard(&mut self, ctx: &mut Context, canvas: &mut Canvas, x_offset:f32, y_offset:f32)->GameResult<()> {
-        
+        // TODO: Improve breadboard design to actual breadboard
         let board_height = 700.0;
         let board_width =1500.0;
         let slot_size=100.0;
@@ -138,19 +141,24 @@ impl event::EventHandler<ggez::GameError> for GameState {
             dragable.draw(ctx, &mut canvas)?
         }
 
+        self.wire.draw(ctx, &mut canvas)?;
+
         canvas.finish(ctx)
     }
 
-    fn mouse_button_down_event(&mut self, _ctx: &mut Context, button: MouseButton, x: f32, y: f32) -> Result<(), GameError> {
+    fn mouse_button_down_event(&mut self, _ctx: &mut Context, button: MouseButton, x: f32, y: f32) -> GameResult {
         if button == MouseButton::Left {
             for component in &mut self.dragables {
                 component.handle_mouse_down(x, y);
             }
+            self.wire.handle_mouse_down(x, y, button);
+        } else if button == MouseButton::Right {
+            self.wire.handle_mouse_down(x, y, button);
         }
         Ok(())
     }
 
-    fn mouse_button_up_event(&mut self, _ctx: &mut Context, button: MouseButton, _x: f32, _y: f32) -> Result<(), GameError> {
+    fn mouse_button_up_event(&mut self, _ctx: &mut Context, button: MouseButton, _x: f32, _y: f32) -> GameResult {
         if button == MouseButton::Left {
             for component in &mut self.dragables {
                 component.handle_mouse_up();
@@ -159,7 +167,7 @@ impl event::EventHandler<ggez::GameError> for GameState {
         Ok(())
     }
 
-    fn mouse_motion_event(&mut self, _ctx: &mut Context, x: f32, y:f32,  dx: f32, dy: f32)-> Result<(), GameError> {
+    fn mouse_motion_event(&mut self, _ctx: &mut Context, x: f32, y:f32,  dx: f32, dy: f32)-> GameResult {
         for component in &mut self.dragables {
             component.handle_mouse_motion(x, y);
         }
