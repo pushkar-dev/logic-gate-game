@@ -1,3 +1,6 @@
+use std::{env, path};
+
+use ggez::glam::vec2;
 use ggez::graphics::{self, Canvas};
 use ggez::mint::Point2;
 use ggez::{Context, GameResult};
@@ -20,13 +23,18 @@ impl DraggableComponent {
     }
 
     pub fn draw(&self, ctx: &mut Context, canvas: &mut Canvas) -> GameResult {
-        let rectangle = graphics::Mesh::new_rectangle(
-            ctx,
-            graphics::DrawMode::fill(),
-            graphics::Rect::new(self.pos.x, self.pos.y, self.size.0, self.size.1),
-            graphics::Color::from_rgb(0, 255, 0),
-        )?;
-        canvas.draw( &rectangle, graphics::DrawParam::default());
+        // let rectangle = graphics::Mesh::new_rectangle(
+        //     ctx,
+        //     graphics::DrawMode::fill(),
+        //     graphics::Rect::new(self.pos.x, self.pos.y, self.size.0, self.size.1),
+        //     graphics::Color::from_rgb(0, 255, 0),
+        // )?;
+
+        let img = graphics::Image::from_path(ctx, "/images/not_gate.png")?;
+        let img_dest = vec2(self.pos.x, self.pos.y);
+        let img_param = graphics::DrawParam::default().dest(img_dest);
+        canvas.draw(&img, graphics::DrawParam::default().dest(img_dest));
+        // canvas.draw( &rectangle, graphics::DrawParam::default());
         Ok(())
     }
 

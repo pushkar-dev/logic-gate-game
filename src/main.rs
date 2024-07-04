@@ -42,8 +42,9 @@ fn main() -> GameResult {
     let mut builder = ContextBuilder::new("breadboard_game", "pushkar");
 
     if let Ok(manifest_dir) = env::var("CARGO_MANIFEST_DIR") {
-        let path = path::PathBuf::from(manifest_dir).join("resources");
-        builder = builder.add_resource_path(path);
+        let config_path = path::PathBuf::from(manifest_dir).join("resources");
+        builder = builder.add_resource_path(config_path);
+        
     }
 
     let (mut ctx, event_loop) = builder.build().unwrap();
