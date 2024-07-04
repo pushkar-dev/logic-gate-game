@@ -22,9 +22,9 @@ impl GameState {
         let mut s= GameState{
             circuit: Circuit::new(),
             dragables: vec![
-                DraggableComponent::new(Point2{x: 100.0, y: 100.0}, (50.0, 50.0)),
-                DraggableComponent::new(Point2{x: 200.0, y: 100.0}, (50.0, 50.0)),
-                DraggableComponent::new(Point2{x: 300.0, y: 100.0}, (50.0, 50.0)),
+                DraggableComponent::new(ctx,Point2{x: 100.0, y: 100.0}, 100, 100, "/images/not_gate.png"),
+                DraggableComponent::new(ctx,Point2{x: 200.0, y: 100.0}, 100, 100, "/images/and_gate.png"),
+                DraggableComponent::new(ctx,Point2{x: 300.0, y: 100.0}, 100, 100, "/images/or_gate.png"),
             ],
         };
         s.reset(ctx)?;

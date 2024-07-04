@@ -1,22 +1,27 @@
-use std::{env, path};
-
 use ggez::glam::vec2;
-use ggez::graphics::{self, Canvas};
+use ggez::graphics::{self, Canvas, Color, Image};
 use ggez::mint::Point2;
 use ggez::{Context, GameResult};
 
 pub struct DraggableComponent {
     pos: Point2<f32>,
     size: (f32, f32),
+    img:Image,
     is_dragged: bool,
     drag_offset: Point2<f32>,
 }
 
 impl DraggableComponent {
-    pub fn new(pos: Point2<f32>, size: (f32, f32)) -> Self {
+    pub fn new(ctx: &mut Context,pos: Point2<f32>, width:u32, height:u32, img_path: &str) -> Self {
+        let img = match graphics::Image::from_path(ctx, img_path){
+            Ok(i) => i,
+            Err(_) => { println!("error in opeing asset path: {}", img_path);
+                        graphics::Image::from_color(ctx, width, height, Some(Color::GREEN)) }
+        };
         DraggableComponent {
             pos,
-            size,
+            size: ((height as f32), (width as f32)),
+            img,
             is_dragged: false,
             drag_offset: Point2{x:0.0, y:0.0},
         }
@@ -29,11 +34,8 @@ impl DraggableComponent {
         //     graphics::Rect::new(self.pos.x, self.pos.y, self.size.0, self.size.1),
         //     graphics::Color::from_rgb(0, 255, 0),
         // )?;
-
-        let img = graphics::Image::from_path(ctx, "/images/not_gate.png")?;
-        let img_dest = vec2(self.pos.x, self.pos.y);
-        let img_param = graphics::DrawParam::default().dest(img_dest);
-        canvas.draw(&img, graphics::DrawParam::default().dest(img_dest));
+        let img_param = graphics::DrawParam::default().dest(vec2(self.pos.x, self.pos.y));
+        canvas.draw(&self.img, img_param);
         // canvas.draw( &rectangle, graphics::DrawParam::default());
         Ok(())
     }
